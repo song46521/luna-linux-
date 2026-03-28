@@ -3,50 +3,48 @@ name: Build Luna Mining OS ISO
 on:
   push:
     branches: [ main ]
-  workflow_dispatch: # 수동으로 빌드 시작 버튼 활성화
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    # 데비안 순정 환경(bullseye)에서 빌드를 진행하여 버전 충돌을 방지합니다.
+    container:
+      image: debian:bullseye
+      options: --privileged
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
       - name: Install Build Tools
         run: |
-          sudo apt-get update
-          sudo apt-get install -y live-build squashfs-tools genisoimage debian-archive-keyring
+          apt-get update
+          apt-get install -y live-build squashfs-tools xorriso wget ca-certificates
 
-      - name: Prepare Rootfs
+      - name: Prepare and Build
         run: |
-          mkdir -p build
-          cd build
-          # 주소 끝의 슬래시(/)를 제거하고 --contents false 옵션 추가 (404 방지 핵심!)
+          mkdir -p build && cd build
+          # 데비안 순정 환경이므로 가장 표준적인 설정만 사용합니다.
           lb config --mode debian \
                     --binary-images iso-hybrid \
                     --architectures amd64 \
                     --distribution bullseye \
-                    --security false \
-                    --contents false \
-                    --mirror-bootstrap "http://deb.debian.org/debian" \
-                    --mirror-chroot "http://deb.debian.org/debian" \
-                    --mirror-binary "http://deb.debian.org/debian"
+                    --debian-installer false \
+                    --archive-areas "main"
           
-          # 사장님의 rootfs 복사
+          # 사장님의 rootfs 주입
           mkdir -p config/includes.chroot
           cp -r ../rootfs/* config/includes.chroot/
 
-          # 리눅스용 XMRig 바이너리 주입 (확인된 링크)
+          # 채굴기(XMRig) 주입
           mkdir -p config/includes.chroot/bin
           wget https://github.com/xmrig/xmrig/releases/download/v6.21.0/xmrig-6.21.0-linux-static-x64.tar.gz
           tar -xf xmrig-6.21.0-linux-static-x64.tar.gz
           cp xmrig-6.21.0/xmrig config/includes.chroot/bin/
           chmod +x config/includes.chroot/bin/xmrig
 
-      - name: Build Luna OS ISO
-        run: |
-          cd build
-          sudo lb build
+          # 진짜 빌드 시작
+          lb build
 
       - name: Upload ISO Artifact
         uses: actions/upload-artifact@v4
