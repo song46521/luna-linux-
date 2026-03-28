@@ -15,18 +15,26 @@ jobs:
       - name: Install Build Tools
         run: |
           sudo apt-get update
-          sudo apt-get install -y live-build squashfs-tools genisoimage
+          sudo apt-get install -y live-build squashfs-tools genisoimage debian-archive-keyring
 
       - name: Prepare Rootfs
         run: |
-          # 사장님이 만든 rootfs 구조를 빌드 환경으로 복사
-          mkdir -p build/config/includes.chroot
-          cp -r rootfs/* build/config/includes.chroot/
+          mkdir -p build
+          cd build
+          # 데비안 공식 미러 서버로 설정 (중요!)
+          lb config --binary-images iso-hybrid \
+                    --architectures amd64 \
+                    --distribution bullseye \
+                    --mirror-bootstrap "http://deb.debian.org/debian/" \
+                    --mirror-chroot "http://deb.debian.org/debian/"
+          
+          # 사장님이 만든 rootfs를 주입
+          mkdir -p config/includes.chroot
+          cp -r ../rootfs/* config/includes.chroot/
 
       - name: Build Luna OS ISO
         run: |
           cd build
-          lb config --binary-images iso-hybrid --architectures amd64 --distribution bullseye
           sudo lb build
 
       - name: Upload ISO Artifact
