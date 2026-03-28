@@ -1,36 +1,38 @@
 #!/bin/sh
 
-# 1. 파일 시스템 마운트 (OS의 기본)
+# 1. 파일 시스템 마운트
 mount -t proc proc /proc
 mount -t sysfs sysfs /sys
 mount -t devtmpfs devtmpfs /dev
 
-# 2. 사장님을 위한 쌈뽕한 부팅 로고 (L-MOS Edition)
+# 2. 사장님 전용 부팅 로고 (L-MOS Edition)
 clear
 echo "#################################################"
-echo "#                                               #"
 echo "#          WELCOME TO LUNA MINING OS            #"
-# (기존 부팅 로고 유지)
-echo "#          Version 1.0.0 (Mining Edition)       #"
-echo "#                                               #"
-echo "#          System Status: OPERATIONAL           #"
-echo "#          Mining Wallet: DHNhBWgAfWU...        #"
-echo "#                                               #"
+echo "#          Version 1.1.0 (SSH & Mining)         #"
+echo "#          SSH Password: luna123                #"
 echo "#################################################"
 echo ""
-echo "[INFO] Initializing Luna Kernel Services..."
+echo "[INFO] Initializing Kernel Services..."
 sleep 1
 
-# 3. L-MOS 채굴기(XMRig) 가동 시작
-echo "[INFO] Starting Luna Miner (DOGE Strategy)..."
-# XMRig를 백그라운드에서 실행하고 로그를 /tmp/miner.log에 저장합니다.
+# 3. 네트워크 초기화 (DHCP로 IP 할당)
+echo "[INFO] Bringing up Network (DHCP)..."
+ip link set eth0 up # 대부분의 유선 랜카드 이름은 eth0입니다.
+dhclient eth0 & # 백그라운드에서 IP를 할당받습니다.
+sleep 3
+echo "[INFO] Current IP: $(ip addr show eth0 | grep 'inet ' | awk '{print $2}')"
+
+# 4. SSH 서버 가동
+echo "[INFO] Starting SSH Server (Port 22)..."
+/etc/init.d/ssh start
+
+# 5. L-MOS 채굴기(XMRig) 백그라운드 가동
+echo "[INFO] Launching Luna Miner (DOGE Strategy)..."
 /bin/xmrig --config=/etc/xmrig/config.json > /tmp/miner.log 2>&1 &
-echo "[SUCCESS] Miner is now running in background!"
-sleep 1
+echo "[SUCCESS] Miner is running!"
 
-echo "[INFO] Security Protocols Active (ID: 159015*)"
+# 6. 사용자 쉘 실행
 echo ""
-
-# 4. 사용자 인터렉션 시작 (Shell 실행)
-echo "Luna OS Shell Ready. (Type 'cat /tmp/miner.log' to check status)"
+echo "Luna OS Ready. (Type 'tail -f /tmp/miner.log' for stats)"
 exec /bin/sh

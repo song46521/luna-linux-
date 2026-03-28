@@ -8,7 +8,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    # 데비안 순정 환경(bullseye)에서 빌드를 진행하여 버전 충돌을 방지합니다.
     container:
       image: debian:bullseye
       options: --privileged
@@ -24,7 +23,7 @@ jobs:
       - name: Prepare and Build
         run: |
           mkdir -p build && cd build
-          # 데비안 순정 환경이므로 가장 표준적인 설정만 사용합니다.
+          # SSH 서버(openssh-server)와 네트워크 도구 추가
           lb config --mode debian \
                     --binary-images iso-hybrid \
                     --architectures amd64 \
@@ -32,9 +31,24 @@ jobs:
                     --debian-installer false \
                     --archive-areas "main"
           
+          # 패키지 리스트에 SSH 추가
+          mkdir -p config/package-lists
+          echo "openssh-server iproute2 isc-dhcp-client" > config/package-lists/my.list.chroot
+
           # 사장님의 rootfs 주입
           mkdir -p config/includes.chroot
           cp -r ../rootfs/* config/includes.chroot/
+
+          # [중요] SSH 설정 및 비밀번호 설정 (Hooks 사용)
+          mkdir -p config/hooks/live
+          cat <<EOF > config/hooks/live/01-setup-ssh.chroot
+          #!/bin/sh
+          # root 비밀번호를 luna123으로 설정
+          echo "root:luna123" | chpasswd
+          # SSH root 로그인 허용
+          sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
+          EOF
+          chmod +x config/hooks/live/01-setup-ssh.chroot
 
           # 채굴기(XMRig) 주입
           mkdir -p config/includes.chroot/bin
