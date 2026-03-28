@@ -21,14 +21,13 @@ jobs:
         run: |
           mkdir -p build
           cd build
-          # 모든 서버 주소를 데비안 공식 서버로 강제 고정
-          lb config --binary-images iso-hybrid \
+          # 데비안 전용 모드(--mode debian) 및 아카이브 영역(main) 명시
+          lb config --mode debian \
+                    --binary-images iso-hybrid \
                     --architectures amd64 \
                     --distribution bullseye \
-                    --parent-distribution bullseye \
-                    --parent-mirror-bootstrap "http://deb.debian.org/debian/" \
-                    --parent-mirror-chroot "http://deb.debian.org/debian/" \
-                    --parent-mirror-binary "http://deb.debian.org/debian/" \
+                    --archive-areas "main" \
+                    --parent-archive-areas "main" \
                     --mirror-bootstrap "http://deb.debian.org/debian/" \
                     --mirror-chroot "http://deb.debian.org/debian/" \
                     --mirror-binary "http://deb.debian.org/debian/" \
