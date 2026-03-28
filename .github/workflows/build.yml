@@ -21,12 +21,19 @@ jobs:
         run: |
           mkdir -p build
           cd build
-          # 데비안 공식 미러 서버로 설정 (중요!)
+          # 모든 서버 주소를 데비안 공식 서버로 강제 고정
           lb config --binary-images iso-hybrid \
                     --architectures amd64 \
                     --distribution bullseye \
+                    --parent-distribution bullseye \
+                    --parent-mirror-bootstrap "http://deb.debian.org/debian/" \
+                    --parent-mirror-chroot "http://deb.debian.org/debian/" \
+                    --parent-mirror-binary "http://deb.debian.org/debian/" \
                     --mirror-bootstrap "http://deb.debian.org/debian/" \
-                    --mirror-chroot "http://deb.debian.org/debian/"
+                    --mirror-chroot "http://deb.debian.org/debian/" \
+                    --mirror-binary "http://deb.debian.org/debian/" \
+                    --mirror-binary-security "http://security.debian.org/debian-security" \
+                    --mirror-chroot-security "http://security.debian.org/debian-security"
           
           # 사장님이 만든 rootfs를 주입
           mkdir -p config/includes.chroot
