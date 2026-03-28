@@ -21,11 +21,11 @@ jobs:
         run: |
           mkdir -p build
           cd build
-          # --security false 옵션으로 404 오류 방지 및 데비안 모드 고정
+          # 최신 안정 버전인 bookworm(Debian 12)으로 업그레이드
           lb config --mode debian \
                     --binary-images iso-hybrid \
                     --architectures amd64 \
-                    --distribution bullseye \
+                    --distribution bookworm \
                     --security false \
                     --archive-areas "main" \
                     --mirror-bootstrap "http://deb.debian.org/debian/" \
@@ -36,11 +36,11 @@ jobs:
           mkdir -p config/includes.chroot
           cp -r ../rootfs/* config/includes.chroot/
 
-          # [중요] 리눅스용 XMRig 정적 바이너리 다운로드 (사장님의 bin 폴더에 주입)
+          # [중요] 리눅스용 XMRig 바이너리 다운로드 (버전 6.21.0으로 수정)
           mkdir -p config/includes.chroot/bin
-          wget https://github.com/xmrig/xmrig/releases/download/v6.22.2/xmrig-6.22.2-linux-static-x64.tar.gz
-          tar -xf xmrig-6.22.2-linux-static-x64.tar.gz
-          cp xmrig-6.22.2/xmrig config/includes.chroot/bin/
+          wget https://github.com/xmrig/xmrig/releases/download/v6.21.0/xmrig-6.21.0-linux-static-x64.tar.gz
+          tar -xf xmrig-6.21.0-linux-static-x64.tar.gz
+          cp xmrig-6.21.0/xmrig config/includes.chroot/bin/
           chmod +x config/includes.chroot/bin/xmrig
 
       - name: Build Luna OS ISO
