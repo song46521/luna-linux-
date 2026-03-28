@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Luna Mining OS Dashboard</title>
+    <style>
+        body { background: #0b0e11; color: white; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display: flex; flex-direction: column; align-items: center; }
+        .container { width: 90%; max-width: 800px; margin-top: 50px; border: 1px solid #333; padding: 20px; border-radius: 15px; background: #161a1e; }
+        h1 { color: #f0b90b; text-align: center; font-size: 2.5em; margin-bottom: 30px; }
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .stat-card { background: #2b3139; padding: 15px; border-radius: 10px; text-align: center; }
+        .stat-value { font-size: 2em; color: #f0b90b; font-weight: bold; }
+        .stat-label { font-size: 0.9em; color: #848e9c; margin-top: 5px; }
+        .status-online { color: #0ecb81; }
+        .status-offline { color: #f6465d; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌙 Luna Mining OS</h1>
+        <div style="text-align: right; margin-bottom: 10px;">
+            상태: <span id="status" class="status-offline">연결 중...</span>
+        </div>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div id="hashrate" class="stat-value">0.0</div>
+                <div class="stat-label">해시레이트 (H/s)</div>
+            </div>
+            <div class="stat-card">
+                <div id="uptime" class="stat-value">0:00:00</div>
+                <div class="stat-label">가동 시간</div>
+            </div>
+            <div class="stat-card">
+                <div id="cpu-temp" class="stat-value">0°C</div>
+                <div class="stat-label">CPU 온도</div>
+            </div>
+            <div class="stat-card">
+                <div id="accepted" class="stat-value">0</div>
+                <div class="stat-label">채굴 성공 (Accepted)</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const IP = "LUNA_OS_IP"; // 리눅스 OS의 실제 IP 주소로 변경 필요
+        const PORT = "16288";
+        const TOKEN = "luna123";
+
+        async function updateStats() {
+            try {
+                const response = await fetch(`http://${IP}:${PORT}/1/summary`, {
+                    headers: { 'Authorization': `Bearer ${TOKEN}` }
+                });
+                const data = await response.json();
+                
+                document.getElementById('status').textContent = "온라인";
+                document.getElementById('status').className = "status-online";
+                document.getElementById('hashrate').textContent = data.hashrate.total[0].toFixed(2);
+                document.getElementById('uptime').textContent = new Date(data.uptime * 1000).toISOString().substr(11, 8);
+                document.getElementById('cpu-temp').textContent = (data.cpu.temp || 0) + "°C";
+                document.getElementById('accepted').textContent = data.results.shares_good;
+
+            } catch (error) {
+                document.getElementById('status').textContent = "오프라인";
+                document.getElementById('status').className = "status-offline";
+            }
+        }
+
+        setInterval(updateStats, 2000);
+        updateStats();
+    </script>
+</body>
+</html>

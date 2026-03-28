@@ -1,0 +1,36 @@
+name: Build Luna Mining OS ISO
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch: # 수동으로 빌드 시작 버튼 활성화
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Install Build Tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y live-build squashfs-tools genisoimage
+
+      - name: Prepare Rootfs
+        run: |
+          # 사장님이 만든 rootfs 구조를 빌드 환경으로 복사
+          mkdir -p build/config/includes.chroot
+          cp -r rootfs/* build/config/includes.chroot/
+
+      - name: Build Luna OS ISO
+        run: |
+          cd build
+          lb config --binary-images iso-hybrid --architectures amd64 --distribution bullseye
+          sudo lb build
+
+      - name: Upload ISO Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: Luna-Mining-OS-ISO
+          path: build/*.iso

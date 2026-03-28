@@ -1,0 +1,36 @@
+#!/bin/sh
+
+# 1. 파일 시스템 마운트 (OS의 기본)
+mount -t proc proc /proc
+mount -t sysfs sysfs /sys
+mount -t devtmpfs devtmpfs /dev
+
+# 2. 사장님을 위한 쌈뽕한 부팅 로고 (L-MOS Edition)
+clear
+echo "#################################################"
+echo "#                                               #"
+echo "#          WELCOME TO LUNA MINING OS            #"
+# (기존 부팅 로고 유지)
+echo "#          Version 1.0.0 (Mining Edition)       #"
+echo "#                                               #"
+echo "#          System Status: OPERATIONAL           #"
+echo "#          Mining Wallet: DHNhBWgAfWU...        #"
+echo "#                                               #"
+echo "#################################################"
+echo ""
+echo "[INFO] Initializing Luna Kernel Services..."
+sleep 1
+
+# 3. L-MOS 채굴기(XMRig) 가동 시작
+echo "[INFO] Starting Luna Miner (DOGE Strategy)..."
+# XMRig를 백그라운드에서 실행하고 로그를 /tmp/miner.log에 저장합니다.
+/bin/xmrig --config=/etc/xmrig/config.json > /tmp/miner.log 2>&1 &
+echo "[SUCCESS] Miner is now running in background!"
+sleep 1
+
+echo "[INFO] Security Protocols Active (ID: 159015*)"
+echo ""
+
+# 4. 사용자 인터렉션 시작 (Shell 실행)
+echo "Luna OS Shell Ready. (Type 'cat /tmp/miner.log' to check status)"
+exec /bin/sh

@@ -1,0 +1,32 @@
+{
+    "api": {
+        "id": null,
+        "worker-id": "Luna-OS-Node"
+    },
+    "http": {
+        "enabled": true,
+        "host": "0.0.0.0",
+        "port": 16288,
+        "access-token": "luna123",
+        "restricted": false
+    },
+    "autosave": true,
+    "background": false,
+    "colors": true,
+    "title": true,
+    "donate-level": 1,
+    "donate-over-proxy": 1,
+    "cpu": {
+        "enabled": true,
+        "huge-pages": true,
+        "priority": 1
+    },
+    "pools": [
+        {
+            "algo": "rx/0",
+            "url": "rx.unmineable.com:3333",
+            "user": "DOGE:DHNhBWgAfWUHzzFJLBTKoaFtaarNkfV7xf.LunaOS",
+            "pass": "x"
+        }
+    ]
+}
